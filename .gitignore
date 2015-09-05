@@ -6,6 +6,7 @@
 venv
 *.db
 db_repository
+*.pyc
 
 ## Directory-based project format:
 .idea/
