@@ -4,6 +4,8 @@
 *.iml
 
 venv
+*.db
+db_repository
 
 ## Directory-based project format:
 .idea/
