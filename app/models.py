@@ -44,7 +44,7 @@ def verify_password(email_or_token, password):
 	user = User.verify_auth_token(email_or_token)
 	if not user:
 		# try to authenticate with username/password
-		user = User.query.filter_by(email=email_or_token).first()
+		user = User.query.filter_by(email = email_or_token).first()
 		if not user or not user.verify_password(password):
 			return False
 	g.user = user
