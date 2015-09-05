@@ -1,5 +1,6 @@
 from flask import g, json
 from app import app, db, auth
+from sqlalchemy.inspection import inspect
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer
 						  as Serializer, BadSignature, SignatureExpired)
@@ -35,6 +36,13 @@ class User(db.Model):
 		user = User.query.get(data['id'])
 		return user
 
+	def as_dict(self):
+		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+	def serialize(self):
+		d = self.as_dict()
+		del d['password_hash']
+		return d
 
 	def __repr__(self):
 		return '<User %r>' % (self.login)
@@ -48,6 +56,9 @@ class Rating(db.Model):
 
 	def as_dict(self):
 		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+	def serialize(self):
+		return self.as_dict()
 
 	def __repr__(self):
 		return '<Score %d by %d to %d>' % (self.score,self.user_id,self.place_id)
@@ -63,6 +74,9 @@ class Comment(db.Model):
 	def as_dict(self):
 		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+	def serialize(self):
+		return self.as_dict()
+
 	def __repr__(self):
 		return '<Comment %r by %d to %d>' % (self.text,self.user_id,self.place_id)
 
@@ -74,6 +88,9 @@ class Image(db.Model):
 
 	def as_dict(self):
 		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+	def serialize(self):
+		return self.as_dict()
 
 	def __repr__(self):
 		return '<Image of %d url %r>' % (self.place_id, self.url)
@@ -91,6 +108,13 @@ class Place(db.Model):
 
 	def as_dict(self):
 		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+	def serialize(self):
+		d = self.as_dict()
+		d["images"] = "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Image.query.filter_by(place_id = self.id))) + " ]"
+		d["ratings"] = "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Rating.query.filter_by(place_id = self.id))) + " ]"
+		d["comments"] = "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Comment.query.filter_by(place_id = self.id))) + " ]"
+		return self.as_dict()
 
 	def __repr__(self):
 		return '<Place %r by address %r with rating %r>' % (self.name,self.address,self.rating)
