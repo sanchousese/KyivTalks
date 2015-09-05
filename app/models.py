@@ -1,4 +1,4 @@
-from flask import g
+from flask import g, json
 from app import app, db, auth
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer
@@ -39,24 +39,15 @@ class User(db.Model):
 	def __repr__(self):
 		return '<User %r>' % (self.login)
 
-@auth.verify_password
-def verify_password(email_or_token, password):
-	# first try to authenticate by token
-	user = User.verify_auth_token(email_or_token)
-	if not user:
-		# try to authenticate with username/password
-		user = User.query.filter_by(email = email_or_token).first()
-		if not user or not user.verify_password(password):
-			return False
-	g.user = user
-	return True
-
 
 class Rating(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	place_id = db.Column(db.Integer,db.ForeignKey('place.id'))
 	score = db.Column(db.Integer)
+
+	def as_dict(self):
+		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 	def __repr__(self):
 		return '<Score %d by %d to %d>' % (self.score,self.user_id,self.place_id)
@@ -68,6 +59,10 @@ class Comment(db.Model):
 	place_id = db.Column(db.Integer,db.ForeignKey('place.id'))
 	text = db.Column(db.String(127))
 	timestamp = db.Column(db.DATETIME)
+
+	def as_dict(self):
+		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 	def __repr__(self):
 		return '<Comment %r by %d to %d>' % (self.text,self.user_id,self.place_id)
 
@@ -76,20 +71,39 @@ class Image(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
 	place_id = db.Column(db.Integer, db.ForeignKey('place.id'))
 	url = db.Column(db.String(255))
+
+	def as_dict(self):
+		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 	def __repr__(self):
 		return '<Image of %d url %r>' % (self.place_id, self.url)
 
 
 class Place(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	address = db.Column(db.String(32), index=True, unique=True)
 	name = db.Column(db.String(16), index=True, unique=True)
+	address = db.Column(db.String(32), index=True, unique=True)
 	description = db.Column(db.String(511))
 	rating = db.Column(db.Integer)
 	comments = db.relationship('Comment', backref='place', lazy='dynamic')
 	ratings = db.relationship('Rating', backref='place', lazy='dynamic')
 	images = db.relationship('Image', backref='place', lazy='dynamic')
 
+	def as_dict(self):
+		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 	def __repr__(self):
 		return '<Place %r by address %r with rating %r>' % (self.name,self.address,self.rating)
 
+
+@auth.verify_password
+def verify_password(email_or_token, password):
+	# first try to authenticate by token
+	user = User.verify_auth_token(email_or_token)
+	if not user:
+		# try to authenticate with username/password
+		user = User.query.filter_by(email = email_or_token).first()
+		if not user or not user.verify_password(password):
+			return False
+	g.user = user
+	return True

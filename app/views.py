@@ -1,6 +1,6 @@
 from app import app, db, auth
-from flask import Flask, abort, request, jsonify, g, url_for
-from app.models import User
+from flask import Flask, abort, request, jsonify, g, url_for, json
+from app.models import User, Place
 
 @app.route('/')
 @app.route('/index')
@@ -45,3 +45,33 @@ def get_auth_token():
 @auth.login_required
 def get_resource():
 	return jsonify({'data': 'Hello, %s!' % g.user.login})
+
+
+@app.route('/api/places')
+def get_places():
+	return "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Place.query.all())) + " ]"
+
+@app.route('/api/places/<int:id>')
+def get_place(id):
+	place = Place.query.get(id)
+	if not place:
+		abort(400)
+	return jsonify(place.as_dict())
+
+@app.route('/api/places/new_place', methods = ['POST'])
+def add_place():
+	name = request.json.get('name')
+	address = request.json.get('address')
+	description = request.json.get('description')
+
+	if (name is None) or (address is None):
+		abort(400)
+	if Place.query.filter_by(name = name).first() is not None \
+	or Place.query.filter_by(address = address).first() is not None :
+		abort(400)
+
+	place = Place(name = name, address = address, description = description, rating = 0)
+	db.session.add(place)
+	db.session.commit()
+
+	return jsonify({'name' : place.name}), 201, {'Location': url_for('get_place', id = place.id, _external=True)}
