@@ -67,7 +67,7 @@ class Comment(db.Model):
 	user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
 	place_id = db.Column(db.Integer,db.ForeignKey('place.id'))
 	text = db.Column(db.String(127))
-	timestamp = db.Column(db.Datetime)
+	timestamp = db.Column(db.DATETIME)
 	def __repr__(self):
 		return '<Comment %r by %d to %d>' % (self.text,self.user_id,self.place_id)
 
