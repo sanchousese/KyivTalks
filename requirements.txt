@@ -9,4 +9,3 @@ itsdangerous==0.23
 passlib==1.6.1
 sqlalchemy-migrate>=0.7.2
 flask-cors>=2.1.0
-
