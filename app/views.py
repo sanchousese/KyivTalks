@@ -71,6 +71,7 @@ def get_place(id):
 
 @app.route('/api/places/new_place', methods = ['POST'])
 @cross_origin()
+@auth.login_required
 def add_place():
 	name = request.json.get('name')
 	address = request.json.get('address')
@@ -91,6 +92,7 @@ def add_place():
 
 @app.route('/api/images/new_image', methods = ['POST'])
 @cross_origin()
+@auth.login_required
 def add_image():
 	url = request.json.get('url')
 	place_id = request.json.get('place_id')
@@ -116,6 +118,7 @@ def get_images_by_place(id):
 
 @app.route('/api/ratings/new_rating', methods = ['POST'])
 @cross_origin()
+@auth.login_required
 def add_rating():
 	place_id = request.json.get('place_id')
 	user_id = request.json.get('user_id')
@@ -132,6 +135,7 @@ def add_rating():
 
 @app.route('/api/comments/new_comment', methods = ['POST'])
 @cross_origin()
+@auth.login_required
 def add_comment():
 	place_id = request.json.get('place_id')
 	user_id = request.json.get('user_id')
