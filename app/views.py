@@ -1,17 +1,21 @@
 from datetime import datetime
 from app import app, db, auth
 from flask import Flask, abort, request, jsonify, g, url_for, json
+from flask.ext.cors import CORS, cross_origin
 from app.models import User, Place, Image, Rating, Comment
 from sqlalchemy.sql import func
 
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route('/')
 @app.route('/index')
+@cross_origin()
 def index():
 	return "Hello, world!"
 
 
 @app.route('/api/new_user', methods = ['POST'])
+@cross_origin()
 def new_user():
 	login = request.json.get('login')
 	email = request.json.get('email')
@@ -30,6 +34,7 @@ def new_user():
 
 
 @app.route('/api/users/<int:id>')
+@cross_origin()
 def get_user(id):
 	user = User.query.get(id)
 	if not user:
@@ -38,6 +43,7 @@ def get_user(id):
 
 
 @app.route('/api/token')
+@cross_origin()
 @auth.login_required
 def get_auth_token():
 	token = g.user.generate_auth_token(600)
@@ -45,16 +51,19 @@ def get_auth_token():
 
 
 @app.route('/api/resource')
+@cross_origin()
 @auth.login_required
 def get_resource():
 	return jsonify({'data': 'Hello, %s!' % g.user.login})
 
 
 @app.route('/api/places')
+@cross_origin()
 def get_places():
 	return "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Place.query.all())) + " ]"
 
 @app.route('/api/places/<int:id>')
+@cross_origin()
 def get_place(id):
 	place = Place.query.get(id)
 	if not place:
@@ -62,6 +71,8 @@ def get_place(id):
 	return json.dumps(place.serialize())
 
 @app.route('/api/places/new_place', methods = ['POST'])
+@cross_origin()
+@auth.login_required
 def add_place():
 	name = request.json.get('name')
 	address = request.json.get('address')
@@ -81,6 +92,8 @@ def add_place():
 
 
 @app.route('/api/images/new_image', methods = ['POST'])
+@cross_origin()
+@auth.login_required
 def add_image():
 	url = request.json.get('url')
 	place_id = request.json.get('place_id')
@@ -96,6 +109,8 @@ def add_image():
 
 
 @app.route('/api/ratings/new_rating', methods = ['POST'])
+@cross_origin()
+@auth.login_required
 def add_rating():
 	place_id = request.json.get('place_id')
 	user_id = request.json.get('user_id')
@@ -114,6 +129,8 @@ def add_rating():
 
 
 @app.route('/api/comments/new_comment', methods = ['POST'])
+@cross_origin()
+@auth.login_required
 def add_comment():
 	place_id = request.json.get('place_id')
 	user_id = request.json.get('user_id')
@@ -127,4 +144,17 @@ def add_comment():
 	comment = Comment(user_id=user_id,place_id=place_id,text=text, timestamp=timestamp)
 	db.session.add(comment)
 	db.session.commit()
-	return jsonify({"id":comment.id}), 201
+	return jsonify({"id": comment.id}), 201
+
+@app.route('/api/search_place/<string>')
+@cross_origin()
+def search_place(string):
+	text = string.lower()
+	places = []
+
+	for i in Place.query.all():
+		if text in i.name.lower() or text in i.address.lower() or text in i.description.lower():
+			places.append(i)
+
+	return "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), places)) + " ]"
+

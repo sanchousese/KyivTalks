@@ -27,6 +27,7 @@ npm run build
 Example
 ========
 
+Create new user:
 ```
 $ curl -i -X POST -H "Content-Type: application/json" -d '{ "email" : "saniasutula3@gmail.com", "password" : "demodemo1234" }' http://127.0.0.1:5000/api/new_user
 
@@ -39,7 +40,7 @@ Location: http://127.0.0.1:5000/api/users/1
 
 ```
 
-
+Get token:
 ```
 $ curl -u saniasutula3@gmail.com:demodemo1234 -i -X GET http://127.0.0.1:5000/api/token
 HTTP/1.0 200 OK
@@ -51,6 +52,7 @@ Content-Type: application/json
 }
 ```
 
+Test route
 ```
 $ curl -u eyJhbGciOiJIUzI1NiIsImV4cCI6MTM4NTY2OTY1NSwiaWF0IjoxMzg1NjY5MDU1fQ.eyJpZCI6MX0.XbOEFJkhjHJ5uRINh2JA1BPzXjSohKYDRT472wGOvjc:x -i -X GET http://127.0.0.1:5000/api/resource
 HTTP/1.0 200 OK
