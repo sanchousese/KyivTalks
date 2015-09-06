@@ -6,23 +6,34 @@
   .controller('SignUpController', SignUpController);
 
   /** @ngInject */
-  function SignUpController(toastr, SignUpService, $location) {
+  function SignUpController(toastr, SignUpService, $location, $rootScope) {
     var vm = this;
     
     vm.email = "";
     vm.password = "";
+    vm.passwordConfirmation = "";
+
     vm.signUp = function(){
-      if (vm.email && vm.password) {
-        var result = SignUpService.signUp(vm.email, vm.password);
-        console.log(result);
-        // if (result.success) {
-        //   $location.path('/sign_in');
-        // } else {
-        //   $location.path('/sign_in');
-        // }
+      if (vm.email && vm.password && vm.password === vm.passwordConfirmation) {
+        SignUpService.signUp(vm.email, vm.password)
+        .then(function(obj){
+          if (obj.success) {
+            toastr.success("Реєстрація успішна. Виконайте вхід");
+            $location.path('/sign_in');
+          } else {
+            vm.email = "";
+            vm.password = "";
+            vm.passwordConfirmation = "";
+            toastr.error(obj.errorMsg);
+          }
+        });
       }
       else {
-        toastr.error("Не вистачає параметрів для реєстрації");
+        if (vm.password === vm.passwordConfirmation) {
+          toastr.error("Не вистачає параметрів для реєстрації");
+        } else {
+          toastr.error("Пароль та підтвердження не співпадають");
+        }
       }
     };
 
@@ -31,10 +42,5 @@
     function activate() {
       console.log('Sign up!');
     }
-
-    // function signUp() {
-    //   // SignUpService.signUp(email, password);
-    //   console.log($scope.email, $scope.password);
-    // }
   }
 })();

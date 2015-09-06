@@ -29,8 +29,6 @@
         .catch(postNewUserFailed);
 
       function postNewUserSuccess(response) {
-        console.log(response.data);
-        toastr.success("Success!");
         return { 
           data: response.data, 
           success: true
@@ -38,15 +36,17 @@
       }
 
       function postNewUserFailed(error) {
+        var errorMsg;
         if (error.status === 400) {
-          toastr.error("User already exists");
+          errorMsg = "Юзер з такими параметрами вже існує";
         } else {
-          toastr.error("Service problems. Try again later.");
+          errorMsg = "Проблеми з сервером. Спробуйте пізніше";
         }
         $log.error("Error while creating new user");
         return { 
           data: error,
-          success: false
+          success: false,
+          errorMsg: errorMsg
         }
       }
     }
