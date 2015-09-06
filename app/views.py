@@ -1,7 +1,7 @@
 from datetime import datetime
 from app import app, db, auth
 from flask import Flask, abort, request, jsonify, g, url_for, json
-from flask.ext.cors import CORS
+from flask.ext.cors import CORS, cross_origin
 from app.models import User, Place, Image, Rating, Comment
 
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -147,6 +147,15 @@ def add_comment():
 	db.session.commit()
 	return jsonify({"id": comment.id}), 201
 
-@app.route('/api/search_place/<text>')
-def search_place(text):
-	pass
+@app.route('/api/search_place/<string>')
+@cross_origin()
+def search_place(string):
+	text = string.lower()
+	places = []
+
+	for i in Place.query.all():
+		if text in i.name.lower() or text in i.address.lower() or text in i.description.lower():
+			places.append(i)
+
+	return "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), places)) + " ]"
+
