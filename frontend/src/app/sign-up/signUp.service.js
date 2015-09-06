@@ -24,23 +24,30 @@
 
       console.log(requestData);
 
-      return 1;
-
-      // return $http.post(apiHost + '/api/new_user', {
-
-      // })
-      //   .then(postNewUserSuccess)
-      //   .catch(postNewUserFailed);
+      return $http.post(apiHost + '/api/new_user', requestData)
+        .then(postNewUserSuccess)
+        .catch(postNewUserFailed);
 
       function postNewUserSuccess(response) {
-        console.log(response.data);
-        toastr.success("Success!");
-        return response.data;
+        return { 
+          data: response.data, 
+          success: true
+        }
       }
 
       function postNewUserFailed(error) {
-        toastr.error("Error!");
+        var errorMsg;
+        if (error.status === 400) {
+          errorMsg = "Юзер з такими параметрами вже існує";
+        } else {
+          errorMsg = "Проблеми з сервером. Спробуйте пізніше";
+        }
         $log.error("Error while creating new user");
+        return { 
+          data: error,
+          success: false,
+          errorMsg: errorMsg
+        }
       }
     }
   }
