@@ -6,13 +6,22 @@
     .controller('SignInController', SignInController);
 
   /** @ngInject */
-  function SignInController(toastr) {
+  function SignInController($http, $location, API_BASE) {
     var vm = this;
 
-    activate();
+    vm.submit = function() {
+      $http.get(API_BASE + '/token', {
+        headers: {
+          'Authorization': 'Basic ' + btoa(vm.username + ':' + vm.password)
+        }
+      }).then(function(response) {
+        localStorage.setItem('token', data.token);
+        console.log('successfully authenticated', response);
 
-    function activate() {
-      console.log('Sign in!');
-    }
+        $location.path('/');
+      }, function() {
+        alert("Can't authenticate!");
+      });
+    };
   }
 })();

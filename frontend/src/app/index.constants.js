@@ -6,6 +6,7 @@
     .module('frontend')
     .constant('malarkey', malarkey)
     .constant('toastr', toastr)
-    .constant('moment', moment);
+    .constant('moment', moment)
+    .constant('API_BASE', 'http://localhost:5000/api');
 
 })();
