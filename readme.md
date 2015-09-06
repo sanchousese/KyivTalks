@@ -92,3 +92,6 @@ Give some place a score. The body must contain a JSON object that defines `user_
 
 - POST **/api/comments/new_comment**
 Create a new comment. The body must contain a JSON object that defines `place_id`,`text`,`user_id` and `anonimity`.
+
+- GET **/api/search_place/<string>**
+Search places by `string`.
