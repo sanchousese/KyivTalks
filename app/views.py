@@ -123,8 +123,11 @@ def add_comment():
 	user_id = request.json.get('user_id')
 	text = request.json.get('text')
 	timestamp = datetime.utcnow()
+	anonimity = request.json.get('anonimity')
 	if (text is None) or (place_id is None) or (user_id is None):
 		abort(400)
+	if anonimity:
+		user_id=None
 	comment = Comment(user_id=user_id,place_id=place_id,text=text, timestamp=timestamp)
 	db.session.add(comment)
 	db.session.commit()
