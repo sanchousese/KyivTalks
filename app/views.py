@@ -2,6 +2,7 @@ from datetime import datetime
 from app import app, db, auth
 from flask import Flask, abort, request, jsonify, g, url_for, json
 from app.models import User, Place, Image, Rating, Comment
+from sqlalchemy.sql import func
 
 
 @app.route('/')
@@ -94,14 +95,6 @@ def add_image():
 	return jsonify({"id":image.id}), 201
 
 
-@app.route('/api/images/get_by_place/<int:id>')
-def get_images_by_place(id):
-	for i in Place.query.filter_by(id=id):
-		print i.images.all()
-	# return Place.query.filter_by(id=id).images.all()
-	return "bla"
-
-
 @app.route('/api/ratings/new_rating', methods = ['POST'])
 def add_rating():
 	place_id = request.json.get('place_id')
@@ -112,6 +105,9 @@ def add_rating():
 	if (Rating.query.filter_by(place_id=place_id).first() is not None) and (Rating.query.filter_by(user_id=user_id).first() is not None):
 		abort(400)
 	rating = Rating(user_id=user_id,place_id=place_id,score=score)
+	place = Place.query.filter_by(id=place_id).first()
+	avg = db.session.query(func.avg(Rating.score)).filter(Rating.place_id==place_id).first()[0]
+	place.rating = avg
 	db.session.add(rating)
 	db.session.commit()
 	return jsonify({"id":rating.id}), 201
@@ -123,8 +119,11 @@ def add_comment():
 	user_id = request.json.get('user_id')
 	text = request.json.get('text')
 	timestamp = datetime.utcnow()
+	anonimity = request.json.get('anonimity')
 	if (text is None) or (place_id is None) or (user_id is None):
 		abort(400)
+	if anonimity:
+		user_id = None
 	comment = Comment(user_id=user_id,place_id=place_id,text=text, timestamp=timestamp)
 	db.session.add(comment)
 	db.session.commit()
