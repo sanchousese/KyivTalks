@@ -6,13 +6,24 @@
   .controller('SignUpController', SignUpController);
 
   /** @ngInject */
-  function SignUpController($scope, toastr) {
-    var vm              = this;
+  function SignUpController(toastr, SignUpService, $location) {
+    var vm = this;
     
-    $scope.email = "";
-    $scope.password = "";
-    $scope.signUp = function(){
-      console.log($scope.email, $scope.password);
+    vm.email = "";
+    vm.password = "";
+    vm.signUp = function(){
+      if (vm.email && vm.password) {
+        var result = SignUpService.signUp(vm.email, vm.password);
+        console.log(result);
+        // if (result.success) {
+        //   $location.path('/sign_in');
+        // } else {
+        //   $location.path('/sign_in');
+        // }
+      }
+      else {
+        toastr.error("Не вистачає параметрів для реєстрації");
+      }
     };
 
     activate();

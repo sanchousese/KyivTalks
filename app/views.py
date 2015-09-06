@@ -1,20 +1,20 @@
 from datetime import datetime
 from app import app, db, auth
 from flask import Flask, abort, request, jsonify, g, url_for, json
-from flask.ext.cors import CORS
+from flask.ext.cors import CORS, cross_origin
 from app.models import User, Place, Image, Rating, Comment
 
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route('/')
 @app.route('/index')
-@cross_origin()
+@cross_origin(origin='localhost')
 def index():
 	return "Hello, world!"
 
 
 @app.route('/api/new_user', methods = ['POST'])
-@cross_origin()
+@cross_origin(origin='localhost', headers=['Content-Type','Authorization'])
 def new_user():
 	login = request.json.get('login')
 	email = request.json.get('email')
@@ -33,7 +33,7 @@ def new_user():
 
 
 @app.route('/api/users/<int:id>')
-@cross_origin()
+@cross_origin(origin='localhost')
 def get_user(id):
 	user = User.query.get(id)
 	if not user:
@@ -42,7 +42,7 @@ def get_user(id):
 
 
 @app.route('/api/token')
-@cross_origin()
+@cross_origin(origin='localhost')
 @auth.login_required
 def get_auth_token():
 	token = g.user.generate_auth_token(600)
@@ -50,19 +50,19 @@ def get_auth_token():
 
 
 @app.route('/api/resource')
-@cross_origin()
+@cross_origin(origin='localhost')
 @auth.login_required
 def get_resource():
 	return jsonify({'data': 'Hello, %s!' % g.user.login})
 
 
 @app.route('/api/places')
-@cross_origin()
+@cross_origin(origin='localhost')
 def get_places():
 	return "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Place.query.all())) + " ]"
 
 @app.route('/api/places/<int:id>')
-@cross_origin()
+@cross_origin(origin='localhost')
 def get_place(id):
 	place = Place.query.get(id)
 	if not place:
@@ -70,7 +70,7 @@ def get_place(id):
 	return json.dumps(place.serialize())
 
 @app.route('/api/places/new_place', methods = ['POST'])
-@cross_origin()
+@cross_origin(origin='localhost')
 def add_place():
 	name = request.json.get('name')
 	address = request.json.get('address')
@@ -90,7 +90,7 @@ def add_place():
 
 
 @app.route('/api/images/new_image', methods = ['POST'])
-@cross_origin()
+@cross_origin(origin='localhost')
 def add_image():
 	url = request.json.get('url')
 	place_id = request.json.get('place_id')
@@ -106,7 +106,7 @@ def add_image():
 
 
 @app.route('/api/images/get_by_place/<int:id>')
-@cross_origin()
+@cross_origin(origin='localhost')
 def get_images_by_place(id):
 	for i in Place.query.filter_by(id=id):
 		print i.images.all()
@@ -115,7 +115,7 @@ def get_images_by_place(id):
 
 
 @app.route('/api/ratings/new_rating', methods = ['POST'])
-@cross_origin()
+@cross_origin(origin='localhost')
 def add_rating():
 	place_id = request.json.get('place_id')
 	user_id = request.json.get('user_id')
@@ -131,7 +131,7 @@ def add_rating():
 
 
 @app.route('/api/comments/new_comment', methods = ['POST'])
-@cross_origin()
+@cross_origin(origin='localhost')
 def add_comment():
 	place_id = request.json.get('place_id')
 	user_id = request.json.get('user_id')
