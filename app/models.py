@@ -1,4 +1,4 @@
-from flask import g, json
+from flask import g, json, jsonify
 from app import app, db, auth
 from sqlalchemy.inspection import inspect
 from passlib.apps import custom_app_context as pwd_context
@@ -111,10 +111,10 @@ class Place(db.Model):
 
 	def serialize(self):
 		d = self.as_dict()
-		d["images"] = "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Image.query.filter_by(place_id = self.id))) + " ]"
-		d["ratings"] = "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Rating.query.filter_by(place_id = self.id))) + " ]"
-		d["comments"] = "[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Comment.query.filter_by(place_id = self.id))) + " ]"
-		return self.as_dict()
+		d["images"] = json.loads("[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Image.query.filter_by(place_id = self.id))) + " ]")
+		d["ratings"] = json.loads("[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Rating.query.filter_by(place_id = self.id))) + " ]")
+		d["comments"] = json.loads("[ " + ", ".join(map(lambda x: str(json.dumps(x.as_dict())), Comment.query.filter_by(place_id = self.id))) + " ]")
+		return d
 
 	def __repr__(self):
 		return '<Place %r by address %r with rating %r>' % (self.name,self.address,self.rating)
