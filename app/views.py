@@ -1,6 +1,8 @@
+from datetime import datetime
 from app import app, db, auth
 from flask import Flask, abort, request, jsonify, g, url_for, json
-from app.models import User, Place
+from app.models import User, Place, Image, Rating, Comment
+
 
 @app.route('/')
 @app.route('/index')
@@ -23,7 +25,7 @@ def new_user():
 	user.hash_password(password)
 	db.session.add(user)
 	db.session.commit()
-	return jsonify({ 'login': user.login, 'email': user.email }), 201, {'Location': url_for('get_user', id = user.id, _external=True)}
+	return json.dumps(user.serialize()), 201, {'Location': url_for('get_user', id = user.id, _external=True)}
 
 
 @app.route('/api/users/<int:id>')
@@ -31,7 +33,7 @@ def get_user(id):
 	user = User.query.get(id)
 	if not user:
 		abort(400)
-	return jsonify({'login': user.login})
+	return json.dumps(user.serialize())
 
 
 @app.route('/api/token')
@@ -56,7 +58,7 @@ def get_place(id):
 	place = Place.query.get(id)
 	if not place:
 		abort(400)
-	return jsonify(place.as_dict())
+	return json.dumps(place.serialize())
 
 @app.route('/api/places/new_place', methods = ['POST'])
 def add_place():
@@ -74,4 +76,56 @@ def add_place():
 	db.session.add(place)
 	db.session.commit()
 
-	return jsonify({'name' : place.name}), 201, {'Location': url_for('get_place', id = place.id, _external=True)}
+	return json.dumps(place.serialize()), 201, {'Location': url_for('get_place', id = place.id, _external=True)}
+
+
+@app.route('/api/images/new_image', methods = ['POST'])
+def add_image():
+	url = request.json.get('url')
+	place_id = request.json.get('place_id')
+	if (url is None) or (place_id is None):
+		abort(400)
+	if Image.query.filter_by(url = url).first() is not None:
+		abort(400)
+	place = Place.query.get(place_id)
+	image = Image(url=url, place=place)
+	db.session.add(image)
+	db.session.commit()
+	return jsonify({"id":image.id}), 201
+
+
+@app.route('/api/images/get_by_place/<int:id>')
+def get_images_by_place(id):
+	for i in Place.query.filter_by(id=id):
+		print i.images.all()
+	# return Place.query.filter_by(id=id).images.all()
+	return "bla"
+
+
+@app.route('/api/ratings/new_rating', methods = ['POST'])
+def add_rating():
+	place_id = request.json.get('place_id')
+	user_id = request.json.get('user_id')
+	score = request.json.get('score')
+	if (score is None) or (place_id is None) or (user_id is None):
+		abort(400)
+	if (Rating.query.filter_by(place_id=place_id).first() is not None) and (Rating.query.filter_by(user_id=user_id).first() is not None):
+		abort(400)
+	rating = Rating(user_id=user_id,place_id=place_id,score=score)
+	db.session.add(rating)
+	db.session.commit()
+	return jsonify({"id":rating.id}), 201
+
+
+@app.route('/api/comments/new_comment', methods = ['POST'])
+def add_comment():
+	place_id = request.json.get('place_id')
+	user_id = request.json.get('user_id')
+	text = request.json.get('text')
+	timestamp = datetime.utcnow()
+	if (text is None) or (place_id is None) or (user_id is None):
+		abort(400)
+	comment = Comment(user_id=user_id,place_id=place_id,text=text, timestamp=timestamp)
+	db.session.add(comment)
+	db.session.commit()
+	return jsonify({"id":comment.id}), 201
