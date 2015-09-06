@@ -12,6 +12,9 @@
         controller: 'MainController',
         controllerAs: 'main'
       })
+      .when('/sign_in', {
+        templateUrl: 'app/sign_in/sign_in.html'
+      })
       .otherwise({
         redirectTo: '/'
       });

@@ -16,3 +16,10 @@ $ source venv/bin/activate
 (venv) $ python db_create.py   
 (venv) $ python db_migrate.py
 ```
+
+How to install front-end
+========
+```
+cd frontend
+npm run build
+```
