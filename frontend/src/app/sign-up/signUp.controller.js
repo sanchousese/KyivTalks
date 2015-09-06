@@ -3,16 +3,16 @@
 
   angular
     .module('frontend')
-    .controller('MainController', MainController);
+    .controller('SignUpController', SignUpController);
 
   /** @ngInject */
-  function MainController(toastr) {
+  function SignUpController(toastr) {
     var vm = this;
 
     activate();
 
     function activate() {
-      console.log('Started!');
+      console.log('Sign up!');
     }
   }
 })();

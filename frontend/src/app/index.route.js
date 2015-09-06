@@ -13,7 +13,14 @@
         controllerAs: 'main'
       })
       .when('/sign_in', {
-        templateUrl: 'app/sign_in/sign_in.html'
+        templateUrl: 'app/sign-in/sign-in.html',
+        controller: 'SignInController',
+        controllerAs: 'signIn'
+      })
+      .when('/sign_up', {
+        templateUrl: 'app/sign-up/sign-up.html',
+        controller: 'SignUpController',
+        controllerAs: 'signUp'
       })
       .otherwise({
         redirectTo: '/'
